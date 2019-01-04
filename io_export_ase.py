@@ -98,7 +98,7 @@ class cScene:
                \n\t*SCENE_FIRSTFRAME {1}\
                \n\t*SCENE_LASTFRAME {2}\
                \n\t*SCENE_FRAMESPEED {3}\
-               \n\t*SCENE_TICKSPERFxRAME {4}\
+               \n\t*SCENE_TICKSPERFRAME {4}\
                \n\t*SCENE_BACKGROUND_STATIC {5}\
                \n\t*SCENE_AMBIENT_STATIC {6}\
                \n}}\n'''.format( self.filename, self.firstframe, self.lastframe, self.framespeed, self.ticksperframe, self.backgroundstatic, self.ambientstatic )
@@ -214,7 +214,7 @@ class cSubMaterials:
                        \n\t\t*MATERIAL_XP_TYPE {13}\
                        {14}\
                        \n\t\t*NUMSUBMTLS {15}\
-                       {16}'''.format( self.name, self.matClass, self.ambient, self.diffuse, self.specular, self.shine, self.shinestrength, self.transparency, self.wiresize, self.shading, self.xpfalloff, self.selfillum, self.falloff, self.xptype, self.diffuseDump, self.numSubMtls, self.matDump )
+                       {16}\n\t}}'''.format( self.name, self.matClass, self.ambient, self.diffuse, self.specular, self.shine, self.shinestrength, self.transparency, self.wiresize, self.shading, self.xpfalloff, self.selfillum, self.falloff, self.xptype, self.diffuseDump, self.numSubMtls, self.matDump )
 
 
         self.dump += '\n}'
