@@ -50,7 +50,7 @@ import math
 import time
 
 # settings
-aseFloat = lambda x: '''{0: 0.4f}'''.format( x )
+aseFloat = lambda x: '{0: 0.4f}'.format( x )
 optionScale = 16.0
 optionSubmaterials = False
 optionSmoothingGroups = True
@@ -80,7 +80,7 @@ class cHeader:
         self.comment = "Ascii Scene Exporter v2.51"
 
     def __repr__( self ):
-        return '''*3DSMAX_ASCIIEXPORT\t200\n*COMMENT "{0}"\n'''.format( self.comment )
+        return '*3DSMAX_ASCIIEXPORT\t200\n*COMMENT "{0}"\n'.format( self.comment )
 
 #== Scene ==================================================================
 class cScene:
@@ -94,14 +94,14 @@ class cScene:
         self.ambientstatic = ''.join( [aseFloat( x ) for x in [0.0, 0.0, 0.0]] )
 
     def __repr__( self ):
-        return '''*SCENE {{\n\t*SCENE_FILENAME "{0}"\
-               \n\t*SCENE_FIRSTFRAME {1}\
-               \n\t*SCENE_LASTFRAME {2}\
-               \n\t*SCENE_FRAMESPEED {3}\
-               \n\t*SCENE_TICKSPERFRAME {4}\
-               \n\t*SCENE_BACKGROUND_STATIC {5}\
-               \n\t*SCENE_AMBIENT_STATIC {6}\
-               \n}}\n'''.format( self.filename, self.firstframe, self.lastframe, self.framespeed, self.ticksperframe, self.backgroundstatic, self.ambientstatic )
+        return('*SCENE {{\n\t*SCENE_FILENAME "{0}"'
+               '\n\t*SCENE_FIRSTFRAME {1}'
+               '\n\t*SCENE_LASTFRAME {2}'
+               '\n\t*SCENE_FRAMESPEED {3}'
+               '\n\t*SCENE_TICKSPERFRAME {4}'
+               '\n\t*SCENE_BACKGROUND_STATIC {5}'
+               '\n\t*SCENE_AMBIENT_STATIC {6}'
+               '\n}}\n'.format( self.filename, self.firstframe, self.lastframe, self.framespeed, self.ticksperframe, self.backgroundstatic, self.ambientstatic ))
 
 #== Materials ==============================================================
 class cMaterials:
@@ -144,14 +144,10 @@ class cMultiMaterials:
     def __init__( self, material_list ):
         self.numMtls = len( material_list )
         # Initialize material information
-        self.dump = '''*MATERIAL_LIST {{\
-                    \n\t*MATERIAL_COUNT {0}\
-                    '''.format( str( self.numMtls ) )
+        self.dump = "*MATERIAL_LIST {{\n\t*MATERIAL_COUNT {0}".format( str( self.numMtls ) )
 
         for index, slot in enumerate( material_list ):
-            self.dump += '''\n\t*MATERIAL {0} {{\
-                            {1}\
-                            \n\t}}'''.format( index, cMaterial( slot ) )
+            self.dump += "\n\t*MATERIAL {0} {{{1}\n\t}}".format( index, cMaterial( slot ) )
 
         self.dump += '\n}'
 
@@ -161,10 +157,7 @@ class cSubMaterials:
     def __init__( self, material_list ):
         slot = material_list[0]
         # Initialize material information
-        self.dump = '''*MATERIAL_LIST {\
-                    \n\t*MATERIAL_COUNT 1\
-                    \n\t*MATERIAL 0 {\
-                    '''
+        self.dump = "*MATERIAL_LIST {\n\t*MATERIAL_COUNT 1\n\t*MATERIAL 0 {"
         self.matDump = ''
         self.name = material_list[0].name
         self.numSubMtls = len( material_list )
@@ -194,27 +187,25 @@ class cSubMaterials:
         if ( len( material_list ) > 1 ):
             # Build SubMaterials
             for index, slot in enumerate( material_list ):
-                self.matDump += '''\n\t\t*SUBMATERIAL {0} {{\
-                                {1}\
-                                \n\t\t}}'''.format( index, cMaterial( slot ) )
+                self.matDump += "\n\t\t*SUBMATERIAL {0} {{{1}\n\t\t}}".format( index, cMaterial( slot ) )
 
-        self.dump += '''\n\t\t*MATERIAL_NAME "{0}"\
-                       \n\t\t*MATERIAL_CLASS "{1}"\
-                       \n\t\t*MATERIAL_AMBIENT {2}\
-                       \n\t\t*MATERIAL_DIFFUSE {3}\
-                       \n\t\t*MATERIAL_SPECULAR {4}\
-                       \n\t\t*MATERIAL_SHINE {5}\
-                       \n\t\t*MATERIAL_SHINESTRENGTH {6}\
-                       \n\t\t*MATERIAL_TRANSPARENCY {7}\
-                       \n\t\t*MATERIAL_WIRESIZE {8}\
-                       \n\t\t*MATERIAL_SHADING {9}\
-                       \n\t\t*MATERIAL_XP_FALLOFF {10}\
-                       \n\t\t*MATERIAL_SELFILLUM {11}\
-                       \n\t\t*MATERIAL_FALLOFF {12}\
-                       \n\t\t*MATERIAL_XP_TYPE {13}\
-                       {14}\
-                       \n\t\t*NUMSUBMTLS {15}\
-                       {16}\n\t}}'''.format( self.name, self.matClass, self.ambient, self.diffuse, self.specular, self.shine, self.shinestrength, self.transparency, self.wiresize, self.shading, self.xpfalloff, self.selfillum, self.falloff, self.xptype, self.diffuseDump, self.numSubMtls, self.matDump )
+        self.dump += ('\n\t\t*MATERIAL_NAME "{0}"'
+                       '\n\t\t*MATERIAL_CLASS "{1}"'
+                       '\n\t\t*MATERIAL_AMBIENT {2}'
+                       '\n\t\t*MATERIAL_DIFFUSE {3}'
+                       '\n\t\t*MATERIAL_SPECULAR {4}'
+                       '\n\t\t*MATERIAL_SHINE {5}'
+                       '\n\t\t*MATERIAL_SHINESTRENGTH {6}'
+                       '\n\t\t*MATERIAL_TRANSPARENCY {7}'
+                       '\n\t\t*MATERIAL_WIRESIZE {8}'
+                       '\n\t\t*MATERIAL_SHADING {9}'
+                       '\n\t\t*MATERIAL_XP_FALLOFF {10}'
+                       '\n\t\t*MATERIAL_SELFILLUM {11}'
+                       '\n\t\t*MATERIAL_FALLOFF {12}'
+                       '\n\t\t*MATERIAL_XP_TYPE {13}'
+                       '{14}'
+                       '\n\t\t*NUMSUBMTLS {15}'
+                       '{16}\n\t}}').format( self.name, self.matClass, self.ambient, self.diffuse, self.specular, self.shine, self.shinestrength, self.transparency, self.wiresize, self.shading, self.xpfalloff, self.selfillum, self.falloff, self.xptype, self.diffuseDump, self.numSubMtls, self.matDump )
 
 
         self.dump += '\n}'
@@ -247,22 +238,21 @@ class cMaterial:
         self.diffusemap = cDiffusemap( slot.texture_slots[0] )
         self.submtls = []
         self.selfillum = aseFloat( slot.emit )
-        self.dump = '''\n\t\t*MATERIAL_NAME "{0}"\
-                       \n\t\t*MATERIAL_CLASS "{1}"\
-                       \n\t\t*MATERIAL_AMBIENT {2}\
-                       \n\t\t*MATERIAL_DIFFUSE {3}\
-                       \n\t\t*MATERIAL_SPECULAR {4}\
-                       \n\t\t*MATERIAL_SHINE {5}\
-                       \n\t\t*MATERIAL_SHINESTRENGTH {6}\
-                       \n\t\t*MATERIAL_TRANSPARENCY {7}\
-                       \n\t\t*MATERIAL_WIRESIZE {8}\
-                       \n\t\t*MATERIAL_SHADING {9}\
-                       \n\t\t*MATERIAL_XP_FALLOFF {10}\
-                       \n\t\t*MATERIAL_SELFILLUM {11}\
-                       \n\t\t*MATERIAL_FALLOFF {12}\
-                       \n\t\t*MATERIAL_XP_TYPE {13}\
-                       {14}\
-                       '''.format( self.name, self.matClass, self.ambient, self.diffuse, self.specular, self.shine, self.shinestrength, self.transparency, self.wiresize, self.shading, self.xpfalloff, self.selfillum, self.falloff, self.xptype, self.diffdump() )
+        self.dump =  ('\n\t\t*MATERIAL_NAME "{0}"'
+                       '\n\t\t*MATERIAL_CLASS "{1}"'
+                       '\n\t\t*MATERIAL_AMBIENT {2}'
+                       '\n\t\t*MATERIAL_DIFFUSE {3}'
+                       '\n\t\t*MATERIAL_SPECULAR {4}'
+                       '\n\t\t*MATERIAL_SHINE {5}'
+                       '\n\t\t*MATERIAL_SHINESTRENGTH {6}'
+                       '\n\t\t*MATERIAL_TRANSPARENCY {7}'
+                       '\n\t\t*MATERIAL_WIRESIZE {8}'
+                       '\n\t\t*MATERIAL_SHADING {9}'
+                       '\n\t\t*MATERIAL_XP_FALLOFF {10}'
+                       '\n\t\t*MATERIAL_SELFILLUM {11}'
+                       '\n\t\t*MATERIAL_FALLOFF {12}'
+                       '\n\t\t*MATERIAL_XP_TYPE {13}'
+                       '{14}').format( self.name, self.matClass, self.ambient, self.diffuse, self.specular, self.shine, self.shinestrength, self.transparency, self.wiresize, self.shading, self.xpfalloff, self.selfillum, self.falloff, self.xptype, self.diffdump() )
 
     def diffdump( self ):
         for x in [self.diffusemap]:
@@ -306,27 +296,37 @@ class cDiffusemap:
         self.noisephase = aseFloat( 0.0 )
         self.bitmapfilter = 'Pyramidal'
 
-        self.dump = '''\n\t\t*MAP_DIFFUSE {{\
-                       \n\t\t\t*MAP_NAME "{0}"\
-                       \n\t\t\t*MAP_CLASS "{1}"\
-                       \n\t\t\t*MAP_SUBNO {2}\
-                       \n\t\t\t*MAP_AMOUNT {3}\
-                       \n\t\t\t*BITMAP "{4}"\
-                       \n\t\t\t*MAP_TYPE {5}\
-                       \n\t\t\t*UVW_U_OFFSET {6}\
-                       \n\t\t\t*UVW_V_OFFSET {7}\
-                       \n\t\t\t*UVW_U_TILING {8}\
-                       \n\t\t\t*UVW_V_TILING {9}\
-                       \n\t\t\t*UVW_ANGLE {10}\
-                       \n\t\t\t*UVW_BLUR {11}\
-                       \n\t\t\t*UVW_BLUR_OFFSET {12}\
-                       \n\t\t\t*UVW_NOUSE_AMT {13}\
-                       \n\t\t\t*UVW_NOISE_SIZE {14}\
-                       \n\t\t\t*UVW_NOISE_LEVEL {15}\
-                       \n\t\t\t*UVW_NOISE_PHASE {16}\
-                       \n\t\t\t*BITMAP_FILTER {17}\
-                       \n\t\t}}\
-                       '''.format( self.name, self.mapclass, self.subno, self.amount, self.bitmap, self.type, self.uoffset, self.voffset, self.utiling, self.vtiling, self.angle, self.blur, self.bluroffset, self.noiseamt, self.noisesize, self.noiselevel, self.noisephase, self.bitmapfilter )
+        self.dump =   ('\n\t\t*MAP_DIFFUSE {{'
+                       '\n\t\t\t*MAP_NAME "{0}"'
+                       '\n\t\t\t*MAP_CLASS "{1}"'
+                       '\n\t\t\t*MAP_SUBNO {2}'
+                       '\n\t\t\t*MAP_AMOUNT {3}'
+                       '\n\t\t\t*BITMAP "{4}"'
+                       '\n\t\t\t*MAP_TYPE {5}'
+                       '\n\t\t\t*UVW_U_OFFSET {6}'
+                       '\n\t\t\t*UVW_V_OFFSET {7}'
+                       '\n\t\t\t*UVW_U_TILING {8}'
+                       '\n\t\t\t*UVW_V_TILING {9}'
+                       '\n\t\t\t*UVW_ANGLE {10}'
+                       '\n\t\t\t*UVW_BLUR {11}'
+                       '\n\t\t\t*UVW_BLUR_OFFSET {12}'
+                       '\n\t\t\t*UVW_NOUSE_AMT {13}'
+                       '\n\t\t\t*UVW_NOISE_SIZE {14}'
+                       '\n\t\t\t*UVW_NOISE_LEVEL {15}'
+                       '\n\t\t\t*UVW_NOISE_PHASE {16}'
+                       '\n\t\t\t*BITMAP_FILTER {17}'
+                       '\n\t\t}}').format( self.name, self.mapclass, self.subno, self.amount, self.bitmap, self.type, self.uoffset, self.voffset, self.utiling, self.vtiling, self.angle, self.blur, self.bluroffset, self.noiseamt, self.noisesize, self.noiselevel, self.noisephase, self.bitmapfilter )
+
+    def __repr__( self ):
+        return self.dump
+#== Helpers ================================================================
+class cHelperObject:
+    def __init__( self, object ):
+        print( object.name + ": Constructing Helper" )
+
+        self.nodetm = cNodeTM( object )
+
+        self.dump = '\n*HELPEROBJECT {{\n\t*NODE_NAME "{0}"\n\t*NODE_PARENT "{1}"\n\t*HELPER_CLASS "{2}"\n{3}\n}}'.format( object.name, object.parent.name ,object.users_group[0].name, self.nodetm  )
 
     def __repr__( self ):
         return self.dump
@@ -351,7 +351,7 @@ class cGeomObject:
         self.nodetm = cNodeTM( object )
         self.mesh = cMesh( object )
 
-        self.dump = '''\n*GEOMOBJECT {{\n\t*NODE_NAME "{0}"\n{1}\n{2}\n\t*PROP_MOTIONBLUR {3}\n\t*PROP_CASTSHADOW {4}\n\t*PROP_RECVSHADOW {5}\n\t*MATERIAL_REF {6}\n}}'''.format( self.name, self.nodetm, self.mesh, self.prop_motionblur, self.prop_castshadow, self.prop_recvshadow, self.material_ref )
+        self.dump = '\n*GEOMOBJECT {{\n\t*NODE_NAME "{0}"\n{1}\n{2}\n\t*PROP_MOTIONBLUR {3}\n\t*PROP_CASTSHADOW {4}\n\t*PROP_RECVSHADOW {5}\n\t*MATERIAL_REF {6}\n}}'.format( self.name, self.nodetm, self.mesh, self.prop_motionblur, self.prop_castshadow, self.prop_recvshadow, self.material_ref )
 
     def __repr__( self ):
         return self.dump
@@ -364,30 +364,30 @@ class cNodeTM:
         self.tm_row0 = '1.0000 0.0000 0.0000'
         self.tm_row1 = '0.0000 1.0000 0.0000'
         self.tm_row2 = '0.0000 0.0000 1.0000'
-        self.tm_row3 = '0.0000 0.0000 0.0000'
-        self.tm_pos = '0.0000 0.0000 0.0000'
-        self.tm_rotaxis = '0.0000 0.0000 0.0000'
+        self.tm_row3 = ' '.join([aseFloat(x) for x in list(object.location)])
+        self.tm_pos = self.tm_row3
+        self.tm_rotaxis = ' '.join([aseFloat(x) for x in list(object.rotation_euler)])
         self.tm_rotangle = '0.0000'
-        self.tm_scale = '1.0000 1.0000 1.0000'
+        self.tm_scale = ' '.join([aseFloat(x) for x in list(object.scale)])
         self.tm_scaleaxis = '0.0000 0.0000 0.0000'
         self.tm_scaleaxisang = '0.0000'
 
-        self.dump = '''\t*NODE_TM {{\
-                       \n\t\t*NODE_NAME "{0}"\
-                       \n\t\t*INHERIT_POS {1}\
-                       \n\t\t*INHERIT_ROT {2}\
-                       \n\t\t*INHERIT_SCL {3}\
-                       \n\t\t*TM_ROW0 {4}\
-                       \n\t\t*TM_ROW1 {5}\
-                       \n\t\t*TM_ROW2 {6}\
-                       \n\t\t*TM_ROW3 {7}\
-                       \n\t\t*TM_POS {8}\
-                       \n\t\t*TM_ROTAXIS {9}\
-                       \n\t\t*TM_ROTANGLE {10}\
-                       \n\t\t*TM_SCALE {11}\
-                       \n\t\t*TM_SCALEAXIS {12}\
-                       \n\t\t*TM_SCALEAXISANG {13}\
-                       \n\t}}'''.format( self.name, self.inherit_pos, self.inherit_rot, self.inherit_scl, self.tm_row0, self.tm_row1, self.tm_row2, self.tm_row3, self.tm_pos, self.tm_rotaxis, self.tm_rotangle, self.tm_scale, self.tm_scaleaxis, self.tm_scaleaxisang )
+        self.dump =   ('\t*NODE_TM {{'
+                       '\n\t\t*NODE_NAME "{0}"'
+                       '\n\t\t*INHERIT_POS {1}'
+                       '\n\t\t*INHERIT_ROT {2}'
+                       '\n\t\t*INHERIT_SCL {3}'
+                       '\n\t\t*TM_ROW0 {4}'
+                       '\n\t\t*TM_ROW1 {5}'
+                       '\n\t\t*TM_ROW2 {6}'
+                       '\n\t\t*TM_ROW3 {7}'
+                       '\n\t\t*TM_POS {8}'
+                       '\n\t\t*TM_ROTAXIS {9}'
+                       '\n\t\t*TM_ROTANGLE {10}'
+                       '\n\t\t*TM_SCALE {11}'
+                       '\n\t\t*TM_SCALEAXIS {12}'
+                       '\n\t\t*TM_SCALEAXISANG {13}'
+                       '\n\t}}').format( self.name, self.inherit_pos, self.inherit_rot, self.inherit_scl, self.tm_row0, self.tm_row1, self.tm_row2, self.tm_row3, self.tm_pos, self.tm_rotaxis, self.tm_rotangle, self.tm_scale, self.tm_scaleaxis, self.tm_scaleaxisang )
 
     def __repr__( self ):
         return self.dump
@@ -487,7 +487,7 @@ class cMesh:
                     self.uvm_cfacelist = ''
 
                     # print extra mapping channels
-                    self.mappingchannels += '''\n\t\t*MESH_MAPPINGCHANNEL {0} {{\n\t\t\t*MESH_NUMTVERTEX {1}\n\t\t\t*MESH_TVERTLIST {2}\n\t\t*MESH_NUMTVFACES {3}\n\t\t*MESH_TFACELIST {4}{5}{6}{7}{8}\n\t\t}}'''.format( str( activeUV + 1 ), self.uvm_numtvertex, self.uvm_tvertlist, self.uvm_numtvfaces, self.uvm_tfacelist, self.uvm_numcvertex, self.uvm_cvertlist, self.uvm_numcvfaces, self.uvm_cfacelist )
+                    self.mappingchannels += '\n\t\t*MESH_MAPPINGCHANNEL {0} {{\n\t\t\t*MESH_NUMTVERTEX {1}\n\t\t\t*MESH_TVERTLIST {2}\n\t\t*MESH_NUMTVFACES {3}\n\t\t*MESH_TFACELIST {4}{5}{6}{7}{8}\n\t\t}}'.format( str( activeUV + 1 ), self.uvm_numtvertex, self.uvm_tvertlist, self.uvm_numtvfaces, self.uvm_tfacelist, self.uvm_numcvertex, self.uvm_cvertlist, self.uvm_numcvfaces, self.uvm_cfacelist )
                     activeUV = activeUV + 1
 
                 # restore uv actives
@@ -498,7 +498,7 @@ class cMesh:
     # UV textures go AFTER MESH_FACE_LIST
     # MESH_NUMTVERTEX, MESH_TVERTLIST, MESH_NUMTVFACES, MESH_TFACELIST         
     def __repr__( self ):
-        temp = '''\t*MESH {{\n\t\t*TIMEVALUE {0}\n\t\t*MESH_NUMVERTEX {1}\n\t\t*MESH_NUMFACES {2}\n\t\t*MESH_VERTEX_LIST {3}\n\t\t*MESH_FACE_LIST {4}{5}{6}{7}{8}{9}{10}{11}{12}{13}\n{14}\n\t}}'''.format( self.timevalue, self.numvertex, self.numfaces, self.vertlist, self.facelist, self.numtvertex_str, self.tvertlist_str, self.numtvfaces_str, self.tfacelist_str, self.numcvertex, self.cvertlist, self.numcvfaces, self.cfacelist, self.uvmapchannels, self.normals )
+        temp = '\t*MESH {{\n\t\t*TIMEVALUE {0}\n\t\t*MESH_NUMVERTEX {1}\n\t\t*MESH_NUMFACES {2}\n\t\t*MESH_VERTEX_LIST {3}\n\t\t*MESH_FACE_LIST {4}{5}{6}{7}{8}{9}{10}{11}{12}{13}\n{14}\n\t}}'.format( self.timevalue, self.numvertex, self.numfaces, self.vertlist, self.facelist, self.numtvertex_str, self.tvertlist_str, self.numtvfaces_str, self.tfacelist_str, self.numcvertex, self.cvertlist, self.numcvfaces, self.cfacelist, self.uvmapchannels, self.normals )
         return temp
 class cVertlist:
     def __init__( self, object ):
@@ -514,7 +514,7 @@ class cVertlist:
         return temp
 
     def __repr__( self ):
-        return '''{{\n{0}\t\t}}'''.format( self.dump() )
+        return '{{\n{0}\t\t}}'.format( self.dump() )
 class cVert:
     def __init__( self, index, coord ):
         global optionScale
@@ -525,7 +525,7 @@ class cVert:
         self.z = aseFloat( coord[2] * optionScale )
 
     def __repr__( self ):
-        return '''\t\t\t*MESH_VERTEX {0} {1} {2} {3}\n'''.format( self.index, self.x, self.y, self.z )
+        return '\t\t\t*MESH_VERTEX {0} {1} {2} {3}\n'.format( self.index, self.x, self.y, self.z )
 class cFacelist:
     def __init__( self, object ):
         global optionAllowMultiMats
@@ -561,7 +561,7 @@ class cFacelist:
                             index = self.smoothing_groups.index( group )
                             sgID = index % 32
 
-            temp = '''\t\t\t*MESH_FACE {0}: A: {1} B: {2} C: {3} AB: 0 BC: 0 CA: 0 *MESH_SMOOTHING {4} *MESH_MTLID {5}\n'''.format( face.index, face.vertices[0], face.vertices[1], face.vertices[2], sgID, self.matid )
+            temp = '\t\t\t*MESH_FACE {0}: A: {1} B: {2} C: {3} AB: 0 BC: 0 CA: 0 *MESH_SMOOTHING {4} *MESH_MTLID {5}\n'.format( face.index, face.vertices[0], face.vertices[1], face.vertices[2], sgID, self.matid )
             self.facelist.append( temp )
 
         if currentMatId < numMats - 1:
@@ -576,7 +576,7 @@ class cFacelist:
         return temp
 
     def __repr__( self ):
-        return '''{{\n{0}\t\t}}'''.format( self.dump() )
+        return '{{\n{0}\t\t}}'.format( self.dump() )
 class cTVertlist:
     def __init__( self, object ):
         self.vertlist = []
@@ -606,7 +606,7 @@ class cTVertlist:
         return temp
 
     def __repr__( self ):
-        return '''{{\n{0}\t\t}}'''.format( self.dump() )
+        return '{{\n{0}\t\t}}'.format( self.dump() )
 class cTVert:
     def __init__( self, index, coord ):
         self.index = index
@@ -614,7 +614,7 @@ class cTVert:
         self.v = aseFloat( coord[1] )
 
     def __repr__( self ):
-        return '''\t\t\t*MESH_TVERT {0} {1} {2} 0.0000\n'''.format( self.index, self.u, self.v )
+        return '\t\t\t*MESH_TVERT {0} {1} {2} 0.0000\n'.format( self.index, self.u, self.v )
 class cTFacelist:
     def __init__( self, facecount ):
         self.facelist = []
@@ -629,7 +629,7 @@ class cTFacelist:
         return temp
 
     def __repr__( self ):
-        return '''{{\n{0}\t\t}}'''.format( self.dump() )
+        return '{{\n{0}\t\t}}'.format( self.dump() )
 class cTFace:
     def __init__( self, x ):
         self.index = x
@@ -639,7 +639,7 @@ class cTFace:
         self.vertices.append( ( x * 3 ) + 2 )
 
     def __repr__( self ):
-        return '''\t\t\t*MESH_TFACE {0} {1} {2} {3}\n'''.format( self.index, self.vertices[0], self.vertices[1], self.vertices[2] )
+        return '\t\t\t*MESH_TFACE {0} {1} {2} {3}\n'.format( self.index, self.vertices[0], self.vertices[1], self.vertices[2] )
 class cCVertlist:
     def __init__( self, object ):
         self.vertlist = []
@@ -667,7 +667,7 @@ class cCVertlist:
         return temp
 
     def __repr__( self ):
-        return '''\t\t*MESH_CVERTLIST {{\n{0}\t\t}}'''.format( self.dump() )
+        return '\t\t*MESH_CVERTLIST {{\n{0}\t\t}}'.format( self.dump() )
 class cCVert:
     def __init__( self, index, temp ):
         self.index = index
@@ -676,7 +676,7 @@ class cCVert:
         self.b = aseFloat( float( temp[2] ) )
 
     def __repr__( self ):
-        return '''\t\t\t*MESH_VERTCOL {0} {1} {2} {3}\n'''.format( self.index, self.r, self.g, self.b )
+        return '\t\t\t*MESH_VERTCOL {0} {1} {2} {3}\n'.format( self.index, self.r, self.g, self.b )
 class cCFacelist:
     def __init__( self, facecount ):
         temp = [0 for x in range( facecount )]
@@ -691,7 +691,7 @@ class cCFacelist:
         return temp
 
     def __repr__( self ):
-        return '''\t\t*MESH_CFACELIST {{\n{0}\t\t}}'''.format( self.dump() )
+        return '\t\t*MESH_CFACELIST {{\n{0}\t\t}}'.format( self.dump() )
 class cCFace:
     def __init__( self, index, data ):
         self.index = index
@@ -701,7 +701,7 @@ class cCFace:
         self.vertices.append( ( index * 3 ) + 2 )
 
     def __repr__( self ):
-        return '''\t\t\t*MESH_CFACE {0} {1} {2} {3}\n'''.format( self.index, self.vertices[0], self.vertices[1], self.vertices[2] )
+        return '\t\t\t*MESH_CFACE {0} {1} {2} {3}\n'.format( self.index, self.vertices[0], self.vertices[1], self.vertices[2] )
 class cNormallist:
     def __init__( self, object ):
         self.normallist = []
@@ -715,7 +715,7 @@ class cNormallist:
         return temp
 
     def __repr__( self ):
-        return '''\t\t*MESH_NORMALS {{\n{0}\t\t}}'''.format( self.dump() )
+        return '\t\t*MESH_NORMALS {{\n{0}\t\t}}'.format( self.dump() )
 class cNormal:
     def __init__( self, face, object ):
         self.faceindex = face.index
@@ -725,7 +725,7 @@ class cNormal:
             self.vertnormals.append( [x, [aseFloat( y ) for y in object.data.vertices[x].normal.to_tuple( 4 )]] )
 
     def __repr__( self ):
-        return '''\t\t\t*MESH_FACENORMAL {0} {1} {2} {3}\n\t\t\t\t*MESH_VERTEXNORMAL {4} {5} {6} {7}\n\t\t\t\t*MESH_VERTEXNORMAL {8} {9} {10} {11}\n\t\t\t\t*MESH_VERTEXNORMAL {12} {13} {14} {15}\n'''.format( self.faceindex, self.facenormal[0], self.facenormal[1], self.facenormal[2], self.vertnormals[0][0], self.vertnormals[0][1][0], self.vertnormals[0][1][1], self.vertnormals[0][1][2], self.vertnormals[1][0], self.vertnormals[1][1][0], self.vertnormals[1][1][1], self.vertnormals[1][1][2], self.vertnormals[2][0], self.vertnormals[2][1][0], self.vertnormals[2][1][1], self.vertnormals[2][1][2] )
+        return '\t\t\t*MESH_FACENORMAL {0} {1} {2} {3}\n\t\t\t\t*MESH_VERTEXNORMAL {4} {5} {6} {7}\n\t\t\t\t*MESH_VERTEXNORMAL {8} {9} {10} {11}\n\t\t\t\t*MESH_VERTEXNORMAL {12} {13} {14} {15}\n'.format( self.faceindex, self.facenormal[0], self.facenormal[1], self.facenormal[2], self.vertnormals[0][0], self.vertnormals[0][1][0], self.vertnormals[0][1][1], self.vertnormals[0][1][2], self.vertnormals[1][0], self.vertnormals[1][1][0], self.vertnormals[1][1][1], self.vertnormals[1][1][2], self.vertnormals[2][0], self.vertnormals[2][1][0], self.vertnormals[2][1][1], self.vertnormals[2][1][2] )
 
 #== Smoothing Groups and Helper Methods =================================
 def defineSmoothing( self, object ):
@@ -878,7 +878,7 @@ from bpy_extras.io_utils import ExportHelper
 from bpy.props import StringProperty, BoolProperty, FloatProperty
 
 class ExportAse( bpy.types.Operator, ExportHelper ):
-    '''Load an Ascii Scene Export File'''
+    """Load an Ascii Scene Export File"""
     bl_idname = "export.ase"
     bl_label = "Export"
     __doc__ = "Ascii Scene Exporter (.ase)"
@@ -1050,12 +1050,22 @@ class ExportAse( bpy.types.Operator, ExportHelper ):
 
                 # Transformations
                 bpy.ops.object.mode_set( mode = 'OBJECT' )
-                bpy.ops.object.transform_apply( location = self.option_apply_location, rotation = self.option_apply_rotation, scale = self.option_apply_scale )
+                #bpy.ops.object.transform_apply( location = self.option_apply_location, rotation = self.option_apply_rotation, scale = self.option_apply_scale )
 
                 #Construct ASE Geometry Nodes
                 aseGeometry += str( cGeomObject( object ) )
 
+            elif object.type == 'EMPTY':
+                bpy.context.scene.objects.active = object
+                object.select = True
+                #bpy.ops.object.mode_set( mode = 'EDIT' )
+
+                # Transformations
+                #bpy.ops.object.mode_set( mode = 'OBJECT' )
+                #bpy.ops.object.transform_apply( location = self.option_apply_location, rotation = self.option_apply_rotation, scale = self.option_apply_scale )
+                aseGeometry += str( cHelperObject( object ) )
             else:
+                print("Unknown: "+object.type)
                 continue
 
         aseModel = ''
