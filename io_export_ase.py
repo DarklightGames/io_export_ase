@@ -162,13 +162,16 @@ class cSubMaterials:
         self.name = material_list[0].name
         self.numSubMtls = len( material_list )
         self.diffusemap = cDiffusemap( slot.texture_slots[0] )
+        self.opacitymap = cOpacitymap( slot.texture_slots[0] ) if slot.use_transparency else ""
         if ( self.numSubMtls > 1 ):
             self.matClass = 'Multi/Sub-Object'
             self.diffuseDump = ''
+            self.opacityDump = ''
         else:
             self.matClass = 'Standard'
             self.numSubMtls = 0
             self.diffuseDump = self.diffdump()
+            self.opacityDump = self.opasdump()
         self.ambient = ''.join( [aseFloat( x ) for x in [0.0, 0.0, 0.0]] )
         self.diffuse = ''.join( [aseFloat( x ) for x in slot.diffuse_color] )
         self.specular = ''.join( [aseFloat( x ) for x in slot.specular_color] )
@@ -203,17 +206,16 @@ class cSubMaterials:
                        '\n\t\t*MATERIAL_SELFILLUM {11}'
                        '\n\t\t*MATERIAL_FALLOFF {12}'
                        '\n\t\t*MATERIAL_XP_TYPE {13}'
-                       '{14}'
-                       '\n\t\t*NUMSUBMTLS {15}'
-                       '{16}\n\t}}').format( self.name, self.matClass, self.ambient, self.diffuse, self.specular, self.shine, self.shinestrength, self.transparency, self.wiresize, self.shading, self.xpfalloff, self.selfillum, self.falloff, self.xptype, self.diffuseDump, self.numSubMtls, self.matDump )
-
-
+                       '{14}{15}'
+                       '\n\t\t*NUMSUBMTLS {16}'
+                       '{17}\n\t}}').format( self.name, self.matClass, self.ambient, self.diffuse, self.specular, self.shine, self.shinestrength, self.transparency, self.wiresize, self.shading, self.xpfalloff, self.selfillum, self.falloff, self.xptype, self.diffuseDump, self.opacityDump, self.numSubMtls, self.matDump )
         self.dump += '\n}'
-
+    def opasdump( self ):
+        for x in [self.opacitymap]:
+            return x
     def diffdump( self ):
         for x in [self.diffusemap]:
             return x
-
     def __repr__( self ):
         return self.dump
 class cMaterial:
@@ -228,7 +230,6 @@ class cMaterial:
         self.shinestrength = aseFloat( slot.specular_intensity )
         self.transparency = aseFloat( slot.translucency * slot.alpha )
         self.wiresize = aseFloat( 1.0 )
-
         # Material Definition
         self.shading = str( slot.specular_shader ).capitalize()
         self.xpfalloff = aseFloat( 0.0 )
@@ -236,6 +237,7 @@ class cMaterial:
         self.falloff = 'In'
         self.soften = False
         self.diffusemap = cDiffusemap( slot.texture_slots[0] )
+        self.opacitymap = cOpacitymap( slot.texture_slots[0] ) if slot.use_transparency else ""
         self.submtls = []
         self.selfillum = aseFloat( slot.emit )
         self.dump =  ('\n\t\t*MATERIAL_NAME "{0}"'
@@ -252,12 +254,13 @@ class cMaterial:
                        '\n\t\t*MATERIAL_SELFILLUM {11}'
                        '\n\t\t*MATERIAL_FALLOFF {12}'
                        '\n\t\t*MATERIAL_XP_TYPE {13}'
-                       '{14}').format( self.name, self.matClass, self.ambient, self.diffuse, self.specular, self.shine, self.shinestrength, self.transparency, self.wiresize, self.shading, self.xpfalloff, self.selfillum, self.falloff, self.xptype, self.diffdump() )
-
+                       '{14}{15}').format( self.name, self.matClass, self.ambient, self.diffuse, self.specular, self.shine, self.shinestrength, self.transparency, self.wiresize, self.shading, self.xpfalloff, self.selfillum, self.falloff, self.xptype, self.diffusemap, self.opacitymap )
+    def opasdump( self ):
+        for x in [self.opacitymap]:
+            return x
     def diffdump( self ):
         for x in [self.diffusemap]:
             return x
-
     def __repr__( self ):
         return self.dump
 class cDiffusemap:
@@ -319,6 +322,66 @@ class cDiffusemap:
 
     def __repr__( self ):
         return self.dump
+class cOpacitymap:
+    def __init__( self, slot ):
+        import os
+        self.dump = ''
+        if slot is None:
+            self.name = 'default'
+            self.mapclass = 'Bitmap'
+            self.bitmap = 'None'
+        else:
+            self.name = slot.name
+            if slot.texture.type == 'IMAGE':
+                self.mapclass = 'Bitmap'
+                self.bitmap = slot.texture.image.filepath
+                if slot.texture.image.has_data:
+                    pass
+                else:
+                    self.bitmap = '\\\\base\\' + self.bitmap.replace( '/', '\\' )
+            else:
+                self.mapclass = 'Bitmap'
+                self.bitmap = 'None'
+        self.subno = 1
+        self.amount = aseFloat( 1.0 )
+        self.type = 'Screen'
+        self.uoffset = aseFloat( 0.0 )
+        self.voffset = aseFloat( 0.0 )
+        self.utiling = aseFloat( 1.0 )
+        self.vtiling = aseFloat( 1.0 )
+        self.angle = aseFloat( 0.0 )
+        self.blur = aseFloat( 1.0 )
+        self.bluroffset = aseFloat( 0.0 )
+        self.noiseamt = aseFloat( 1.0 )
+        self.noisesize = aseFloat( 1.0 )
+        self.noiselevel = 1
+        self.noisephase = aseFloat( 0.0 )
+        self.bitmapfilter = 'Pyramidal'
+
+        self.dump =   ('\n\t\t*MAP_OPACITY {{'
+                       '\n\t\t\t*MAP_NAME "{0}"'
+                       '\n\t\t\t*MAP_CLASS "{1}"'
+                       '\n\t\t\t*MAP_SUBNO {2}'
+                       '\n\t\t\t*MAP_AMOUNT {3}'
+                       '\n\t\t\t*BITMAP "{4}"'
+                       '\n\t\t\t*MAP_TYPE {5}'
+                       '\n\t\t\t*UVW_U_OFFSET {6}'
+                       '\n\t\t\t*UVW_V_OFFSET {7}'
+                       '\n\t\t\t*UVW_U_TILING {8}'
+                       '\n\t\t\t*UVW_V_TILING {9}'
+                       '\n\t\t\t*UVW_ANGLE {10}'
+                       '\n\t\t\t*UVW_BLUR {11}'
+                       '\n\t\t\t*UVW_BLUR_OFFSET {12}'
+                       '\n\t\t\t*UVW_NOUSE_AMT {13}'
+                       '\n\t\t\t*UVW_NOISE_SIZE {14}'
+                       '\n\t\t\t*UVW_NOISE_LEVEL {15}'
+                       '\n\t\t\t*UVW_NOISE_PHASE {16}'
+                       '\n\t\t\t*BITMAP_FILTER {17}'
+                       '\n\t\t}}').format( self.name, self.mapclass, self.subno, self.amount, self.bitmap, self.type, self.uoffset, self.voffset, self.utiling, self.vtiling, self.angle, self.blur, self.bluroffset, self.noiseamt, self.noisesize, self.noiselevel, self.noisephase, self.bitmapfilter )
+
+    def __repr__( self ):
+        return self.dump
+
 #== Helpers ================================================================
 class cHelperObject:
     def __init__( self, object ):
@@ -1050,7 +1113,7 @@ class ExportAse( bpy.types.Operator, ExportHelper ):
 
                 # Transformations
                 bpy.ops.object.mode_set( mode = 'OBJECT' )
-                #bpy.ops.object.transform_apply( location = self.option_apply_location, rotation = self.option_apply_rotation, scale = self.option_apply_scale )
+                bpy.ops.object.transform_apply( location = self.option_apply_location, rotation = self.option_apply_rotation, scale = self.option_apply_scale )
 
                 #Construct ASE Geometry Nodes
                 aseGeometry += str( cGeomObject( object ) )
