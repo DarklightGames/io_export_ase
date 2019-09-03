@@ -1076,7 +1076,7 @@ class ExportAse( bpy.types.Operator, ExportHelper ):
         return {'FINISHED'}
 
 def menu_func( self, context ):
-    self.layout.operator( ExportAse.bl_idname, text = "Ascii Scene Exporter (.ase)" )
+    self.layout.operator( ExportAse.bl_idname, text = "ASCII Scene Exporter (.ase)" )
 
 def register():
     bpy.utils.register_class( ExportAse )
