@@ -24,8 +24,8 @@
 bl_info = {
     "name": "ASCII Scene Exporter",
     "author": "Richard Bartlett, MCampagnini",
-    "version": ( 2, 5, 2 ),
-    "blender": ( 2, 7, 8 ),
+    "version": ( 2, 80, 0 ),
+    "blender": ( 2, 80, 0 ),
     "api": 36079,
     "location": "File > Export > ASCII Scene Export(.ase)",
     "description": "ASCII Scene Export(.ase)",
@@ -48,6 +48,7 @@ import os
 import bpy
 import math
 import time
+from bpy_extras import node_shader_utils
 
 # settings
 aseFloat = lambda x: '''{0: 0.4f}'''.format( x )
@@ -124,6 +125,8 @@ class cMaterials:
                     # if the material is not in the material_list, add it
                     if self.material_list.count( slot.material ) == 0:
                         self.material_list.append( slot.material )
+                        mat_wrap = node_shader_utils.PrincipledBSDFWrapper(slot.material) if slot.material else None
+                        # image = mat_wrap.base_color_texture.image
                         matList.append( slot.material.name )
 
         self.material_count = len( self.material_list )
@@ -168,7 +171,7 @@ class cSubMaterials:
         self.matDump = ''
         self.name = material_list[0].name
         self.numSubMtls = len( material_list )
-        self.diffusemap = cDiffusemap( slot.texture_slots[0] )
+        self.diffusemap = cDiffusemap( None ) # /*slot.texture_slots[0]*/
         if ( self.numSubMtls > 1 ):
             self.matClass = 'Multi/Sub-Object'
             self.diffuseDump = ''
@@ -179,17 +182,17 @@ class cSubMaterials:
         self.ambient = ''.join( [aseFloat( x ) for x in [0.0, 0.0, 0.0]] )
         self.diffuse = ''.join( [aseFloat( x ) for x in slot.diffuse_color] )
         self.specular = ''.join( [aseFloat( x ) for x in slot.specular_color] )
-        self.shine = aseFloat( slot.specular_hardness / 511 )
-        self.shinestrength = aseFloat( slot.specular_intensity )
-        self.transparency = aseFloat( slot.translucency * slot.alpha )
+        self.shine = aseFloat( 0 )  #slot.specular_hardness / 511 )
+        self.shinestrength = aseFloat( 0 )
+        self.transparency = aseFloat( 0 )
         self.wiresize = aseFloat( 1.0 )
-        self.shading = str( material_list[0].specular_shader ).capitalize()
+        self.shading = 'WHO CARES'
         self.xpfalloff = aseFloat( 0.0 )
         self.xptype = 'Filter'
         self.falloff = 'In'
         self.soften = False
         self.submtls = []
-        self.selfillum = aseFloat( material_list[0].emit )
+        self.selfillum = aseFloat( 0 )
 
         if ( len( material_list ) > 1 ):
             # Build SubMaterials
@@ -244,7 +247,7 @@ class cMaterial:
         self.xptype = 'Filter'
         self.falloff = 'In'
         self.soften = False
-        self.diffusemap = cDiffusemap( slot.texture_slots[0] )
+        self.diffusemap = cDiffusemap( None )  # slot.texture_slots[0]
         self.submtls = []
         self.selfillum = aseFloat( slot.emit )
         self.dump = '''\n\t\t*MATERIAL_NAME "{0}"\
@@ -396,11 +399,11 @@ class cMesh:
         bpy.ops.mesh.reveal
 
         if collisionObject( object ) == False:
-            object.data.uv_textures.active_index = 0
-            object.data.uv_texture_stencil_index = 0
+            object.data.uv_layers.active_index = 0
+            object.data.uv_layer_stencil_index = 0
             self.tvertlist = cTVertlist( object )
             self.numtvertex = self.tvertlist.length
-            self.numtvfaces = len( object.data.uv_texture_stencil.data )
+            self.numtvfaces = int(len( object.data.uv_layer_stencil.data ) / 3)
             self.tfacelist = cTFacelist( self.numtvfaces )
             self.uvmapchannels = self.uvdump( object )
 
@@ -446,7 +449,7 @@ class cMesh:
     def getUVLayerNames( self, object ):
         self.uvLayerNames = []
         obj = object.data
-        for uv in obj.uv_textures.keys():
+        for uv in obj.uv_layers.keys():
             self.uvLayerNames.append( str( uv ) )
 
     def uvdump( self, object ):
@@ -454,44 +457,44 @@ class cMesh:
         # if there is more than 1 uv layer
         if collisionObject( object ) == False:
             self.getUVLayerNames( object )
-            if len( self.uvLayerNames ) > 1:
-                # save uv actives
-                active_uv = object.data.uv_textures.active_index
-                obj = object.data
-                activeUV = 0
-                for uvname in self.uvLayerNames:
-                    if activeUV == 0:
-                        activeUV += 1
-                        continue
-                    obj.uv_textures.active_index = activeUV
-                    obj.uv_texture_stencil_index = activeUV
-                    self.uvm_tvertlist = cTVertlist( object )
-                    self.uvm_numtvertex = self.uvm_tvertlist.length
-                    self.uvm_numtvfaces = len( object.data.uv_texture_stencil.data )
-                    self.uvm_tfacelist = cTFacelist( self.uvm_numtvfaces )
+            # if len( self.uvLayerNames ) > 1:
+            # save uv actives
+            active_uv = object.data.uv_layers.active_index
+            obj = object.data
+            activeUV = 0
+            for uvname in self.uvLayerNames:
+                if activeUV == 0:
+                    activeUV += 1
+                    continue
+                obj.uv_layers.active_index = activeUV
+                obj.uv_layer_stencil_index = activeUV
+                self.uvm_tvertlist = cTVertlist( object )
+                self.uvm_numtvertex = self.uvm_tvertlist.length
+                self.uvm_numtvfaces = len( object.data.uv_layer_stencil.data ) / 3
+                self.uvm_tfacelist = cTFacelist( self.uvm_numtvfaces )
 
-                    # if len(object.data.vertex_colors) > 0:
-                        # self.uvm_cvertlist = cCVertlist(object)
-                        # self.uvm_numcvertex = self.uvm_cvertlist.length
-                        # self.uvm_numcvfaces = len(object.data.vertex_colors[0].data)
-                        # self.uvm_cfacelist = cCFacelist(self.uvm_numcvfaces)
+                # if len(object.data.vertex_colors) > 0:
+                    # self.uvm_cvertlist = cCVertlist(object)
+                    # self.uvm_numcvertex = self.uvm_cvertlist.length
+                    # self.uvm_numcvfaces = len(object.data.vertex_colors[0].data)
+                    # self.uvm_cfacelist = cCFacelist(self.uvm_numcvfaces)
 
-                        # self.uvm_cvertlist = '\n{0}'.format(self.uvm_cvertlist)
-                        # self.uvm_numcvertex = '\n\t\t*MESH_NUMCVERTEX {0}'.format(self.uvm_numcvertex)
-                        # self.uvm_numcvfaces = '\n\t\t*MESH_NUMCVFACES {0}'.format(self.uvm_numcvfaces)
-                        # self.uvm_cfacelist = '\n{0}'.format(self.uvm_cfacelist)
-                    # else:
-                    self.uvm_numcvertex = ''
-                    self.uvm_numcvfaces = ''
-                    self.uvm_cvertlist = ''
-                    self.uvm_cfacelist = ''
+                    # self.uvm_cvertlist = '\n{0}'.format(self.uvm_cvertlist)
+                    # self.uvm_numcvertex = '\n\t\t*MESH_NUMCVERTEX {0}'.format(self.uvm_numcvertex)
+                    # self.uvm_numcvfaces = '\n\t\t*MESH_NUMCVFACES {0}'.format(self.uvm_numcvfaces)
+                    # self.uvm_cfacelist = '\n{0}'.format(self.uvm_cfacelist)
+                # else:
+                self.uvm_numcvertex = ''
+                self.uvm_numcvfaces = ''
+                self.uvm_cvertlist = ''
+                self.uvm_cfacelist = ''
 
-                    # print extra mapping channels
-                    self.mappingchannels += '''\n\t\t*MESH_MAPPINGCHANNEL {0} {{\n\t\t\t*MESH_NUMTVERTEX {1}\n\t\t\t*MESH_TVERTLIST {2}\n\t\t*MESH_NUMTVFACES {3}\n\t\t*MESH_TFACELIST {4}{5}{6}{7}{8}\n\t\t}}'''.format( str( activeUV + 1 ), self.uvm_numtvertex, self.uvm_tvertlist, self.uvm_numtvfaces, self.uvm_tfacelist, self.uvm_numcvertex, self.uvm_cvertlist, self.uvm_numcvfaces, self.uvm_cfacelist )
-                    activeUV = activeUV + 1
+                # print extra mapping channels
+                self.mappingchannels += '''\n\t\t*MESH_MAPPINGCHANNEL {0} {{\n\t\t\t*MESH_NUMTVERTEX {1}\n\t\t\t*MESH_TVERTLIST {2}\n\t\t*MESH_NUMTVFACES {3}\n\t\t*MESH_TFACELIST {4}{5}{6}{7}{8}\n\t\t}}'''.format( str( activeUV + 1 ), self.uvm_numtvertex, self.uvm_tvertlist, self.uvm_numtvfaces, self.uvm_tfacelist, self.uvm_numcvertex, self.uvm_cvertlist, self.uvm_numcvfaces, self.uvm_cfacelist )
+                activeUV = activeUV + 1
 
-                # restore uv actives
-                object.data.uv_textures.active_index = active_uv
+            # restore uv actives
+            object.data.uv_layers.active_index = active_uv
 
         return self.mappingchannels
 
@@ -583,18 +586,18 @@ class cTVertlist:
 
         # update tessface
         mesh = bpy.context.object.data
-        mesh.update( calc_tessface = True )
-        uv_layers_count = len( object.data.tessface_uv_textures )
+        mesh.update()
+        mesh.calc_loop_triangles()
 
-        for index, face in enumerate( object.data.tessfaces ):
-            if len( object.data.tessface_uv_textures ) == 0:
+        for index, face in enumerate( object.data.loop_triangles ):
+            if len( object.data.uv_layers ) == 0:
                 raise Error( "Error:  No UV texture data for " + object.name )
             else:
-                temp = cTVert( ( index * 3 ), object.data.tessface_uv_textures[object.data.uv_textures.active_index].data[face.index].uv1 )
+                temp = cTVert( ( index * 3 ) + 0, object.data.uv_layers[object.data.uv_layers.active_index].data[face.index * 3 + 0].uv )
                 self.vertlist.append( temp )
-                temp = cTVert( ( index * 3 ) + 1, object.data.tessface_uv_textures[object.data.uv_textures.active_index].data[face.index].uv2 )
+                temp = cTVert( ( index * 3 ) + 1, object.data.uv_layers[object.data.uv_layers.active_index].data[face.index * 3 + 1].uv )
                 self.vertlist.append( temp )
-                temp = cTVert( ( index * 3 ) + 2, object.data.tessface_uv_textures[object.data.uv_textures.active_index].data[face.index].uv3 )
+                temp = cTVert( ( index * 3 ) + 2, object.data.uv_layers[object.data.uv_layers.active_index].data[face.index * 3 + 2].uv )
                 self.vertlist.append( temp )
 
         self.length = len( self.vertlist )
@@ -647,14 +650,14 @@ class cCVertlist:
 
         # Blender 2.63+
         bpy.ops.object.mode_set( mode = 'OBJECT' )
-        object.data.calc_tessface()
+        object.data.calc_loop_triangles()
 
-        for face in object.data.tessfaces:
-            temp = object.data.tessface_vertex_colors[0].data[face.index].color1
+        for face in object.data.loop_triangles:
+            temp = object.data.vertex_colors[0].data[face.index * 3 + 0].color
             self.vertlist.append( cCVert( self.index, temp ) )
-            temp = object.data.tessface_vertex_colors[0].data[face.index].color2
+            temp = object.data.vertex_colors[0].data[face.index * 3 + 1].color
             self.vertlist.append( cCVert( self.index + 1, temp ) )
-            temp = object.data.tessface_vertex_colors[0].data[face.index].color3
+            temp = object.data.vertex_colors[0].data[face.index * 3 + 2].color
             self.vertlist.append( cCVert( self.index + 2, temp ) )
             self.index += 3
 
@@ -734,7 +737,7 @@ def defineSmoothing( self, object ):
     seam_edge_list = []
     sharp_edge_list = []
 
-    _mode = bpy.context.scene.objects.active.mode
+    _mode = bpy.context.active_object.mode
     bpy.ops.object.mode_set( mode = 'EDIT' )
     bpy.ops.mesh.select_all( action = 'DESELECT' )
     setSelMode( 'EDGE' )
@@ -857,10 +860,10 @@ def getSelectedFaces( self, index = False ):
     bpy.ops.object.editmode_toggle()
     bpy.ops.object.editmode_toggle()
 
-    _mode = bpy.context.scene.objects.active.mode
+    _mode = bpy.context.active_object.mode
     bpy.ops.object.mode_set( mode = 'EDIT' )
 
-    object = bpy.context.scene.objects.active
+    object = bpy.context.active_object
     for face in object.data.polygons:
         if face.select == True:
             if index == False:
@@ -883,65 +886,65 @@ class ExportAse( bpy.types.Operator, ExportHelper ):
     bl_label = "Export"
     __doc__ = "Ascii Scene Exporter (.ase)"
     filename_ext = ".ase"
-    filter_glob = StringProperty( default = "*.ase", options = {'HIDDEN'} )
+    filter_glob : StringProperty( default = "*.ase", options = {'HIDDEN'} )
 
-    filepath = StringProperty( 
+    filepath : StringProperty(
         name = "File Path",
         description = "File path used for exporting the ASE file",
         maxlen = 1024,
         default = "" )
 
-    option_triangulate = BoolProperty( 
+    option_triangulate : BoolProperty(
             name = "Triangulate",
             description = "Triangulates all exportable objects",
             default = True )
 
-    option_normals = BoolProperty( 
+    option_normals : BoolProperty(
             name = "Recalculate Normals",
             description = "Recalculate normals before exporting",
             default = True )
 
-    option_remove_doubles = BoolProperty( 
+    option_remove_doubles : BoolProperty(
             name = "Remove Doubles",
             description = "Remove any duplicate vertices before exporting",
             default = True )
 
-    option_apply_scale = BoolProperty( 
+    option_apply_scale : BoolProperty(
             name = "Scale",
             description = "Apply scale transformation",
             default = True )
 
-    option_apply_location = BoolProperty( 
+    option_apply_location : BoolProperty(
             name = "Location",
             description = "Apply location transformation",
             default = True )
 
-    option_apply_rotation = BoolProperty( 
+    option_apply_rotation : BoolProperty(
             name = "Rotation",
             description = "Apply rotation transformation",
             default = True )
 
-    option_smoothinggroups = BoolProperty( 
+    option_smoothinggroups : BoolProperty(
             name = "Smoothing Groups",
             description = "Construct hard edge islands as smoothing groups",
             default = True )
 
-    option_separate = BoolProperty( 
+    option_separate : BoolProperty(
             name = "Separate",
             description = "A separate ASE file for every selected object",
             default = False )
 
-    option_submaterials = BoolProperty( 
+    option_submaterials : BoolProperty(
             name = "Use Submaterials (UDK)",
             description = "Export a single material with multiple sub materials",
             default = True )
 
-    option_allowmultimats = BoolProperty( 
+    option_allowmultimats : BoolProperty(
             name = "Allow Multiple Materials (UDK)",
             description = "Allow multiple materials per geometry object",
             default = True )
 
-    option_scale = FloatProperty( 
+    option_scale : FloatProperty(
             name = "Scale",
             description = "Object scaling factor (default: 1.0)",
             min = 0.01,
@@ -954,18 +957,18 @@ class ExportAse( bpy.types.Operator, ExportHelper ):
         layout = self.layout
 
         box = layout.box()
-        box.label( 'Essentials:' )
+        box.label(text='Essentials:' )
         box.prop( self, 'option_triangulate' )
         box.prop( self, 'option_normals' )
         box.prop( self, 'option_remove_doubles' )
-        box.label( "Transformations:" )
+        box.label( text="Transformations:" )
         box.prop( self, 'option_apply_scale' )
         box.prop( self, 'option_apply_rotation' )
         box.prop( self, 'option_apply_location' )
-        box.label( "Materials:" )
+        box.label( text="Materials:" )
         box.prop( self, 'option_submaterials' )
         box.prop( self, 'option_allowmultimats' )
-        box.label( "Advanced:" )
+        box.label( text="Advanced:" )
         box.prop( self, 'option_scale' )
         box.prop( self, 'option_smoothinggroups' )
 
@@ -1029,8 +1032,8 @@ class ExportAse( bpy.types.Operator, ExportHelper ):
         # Apply applicable options
         for object in bpy.context.selected_objects:
             if object.type == 'MESH':
-                bpy.context.scene.objects.active = object
-                object.select = True
+                bpy.context.view_layer.objects.active = object
+                # object.select = True
 
                 # Options
                 bpy.ops.object.mode_set( mode = 'EDIT' )
@@ -1077,11 +1080,11 @@ def menu_func( self, context ):
 
 def register():
     bpy.utils.register_class( ExportAse )
-    bpy.types.INFO_MT_file_export.append( menu_func )
+    bpy.types.TOPBAR_MT_file_export.append( menu_func )
 
 def unregister():
     bpy.utils.unregister_class( ExportAse )
-    bpy.types.INFO_MT_file_export.remove( menu_func )
+    bpy.types.TOPBAR_MT_file_export.remove( menu_func )
 
 if __name__ == "__main__":
     register()
