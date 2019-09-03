@@ -1,7 +1,7 @@
 # ASE Export Script
 MCampagnini (http://code.google.com/p/ase-export-vmc/)
 
-This is a fork from the original project by MCampagnini. The script has been upgraded to support Blender 2.78a.
+This is a fork from the original project by MCampagnini. The script has been upgraded to support Blender 2.78a and Blender 2.80 (check the Releases).
 
 ## Videos
 * Blender 2.63a and ASE 2.01 (http://www.youtube.com/watch?v=63Wz0FoK2U0)
