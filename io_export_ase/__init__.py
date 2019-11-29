@@ -182,7 +182,7 @@ class cSubMaterials:
         self.ambient = ''.join( [aseFloat( x ) for x in [0.0, 0.0, 0.0]] )
         self.diffuse = ''.join( [aseFloat( x ) for x in slot.diffuse_color] )
         self.specular = ''.join( [aseFloat( x ) for x in slot.specular_color] )
-        self.shine = aseFloat( 0 )  #slot.specular_hardness / 511 )
+        self.shine = aseFloat( 0 )
         self.shinestrength = aseFloat( 0 )
         self.transparency = aseFloat( 0 )
         self.wiresize = aseFloat( 1.0 )
@@ -220,7 +220,7 @@ class cSubMaterials:
                        {16}'''.format( self.name, self.matClass, self.ambient, self.diffuse, self.specular, self.shine, self.shinestrength, self.transparency, self.wiresize, self.shading, self.xpfalloff, self.selfillum, self.falloff, self.xptype, self.diffuseDump, self.numSubMtls, self.matDump )
 
 
-        self.dump += '\n}'
+        self.dump += '\t\n}\n}'
 
     def diffdump( self ):
         for x in [self.diffusemap]:
@@ -236,20 +236,20 @@ class cMaterial:
         self.ambient = ''.join( [aseFloat( x ) for x in [0.0, 0.0, 0.0]] )
         self.diffuse = ''.join( [aseFloat( x ) for x in slot.diffuse_color] )
         self.specular = ''.join( [aseFloat( x ) for x in slot.specular_color] )
-        self.shine = aseFloat( slot.specular_hardness / 511 )
-        self.shinestrength = aseFloat( slot.specular_intensity )
-        self.transparency = aseFloat( slot.translucency * slot.alpha )
+        self.shine = aseFloat( 0.0 )  # slot.specular_hardness / 511
+        self.shinestrength = aseFloat( 0.0 )  # slot.specular_intensity
+        self.transparency = aseFloat( 0.0 )  # slot.translucency * slot.alpha
         self.wiresize = aseFloat( 1.0 )
 
         # Material Definition
-        self.shading = str( slot.specular_shader ).capitalize()
+        self.shading = 'WHO CARES'  # str( slot.specular_shader ).capitalize()
         self.xpfalloff = aseFloat( 0.0 )
         self.xptype = 'Filter'
         self.falloff = 'In'
         self.soften = False
         self.diffusemap = cDiffusemap( None )  # slot.texture_slots[0]
         self.submtls = []
-        self.selfillum = aseFloat( slot.emit )
+        self.selfillum = aseFloat( 0.0 )
         self.dump = '''\n\t\t*MATERIAL_NAME "{0}"\
                        \n\t\t*MATERIAL_CLASS "{1}"\
                        \n\t\t*MATERIAL_AMBIENT {2}\
