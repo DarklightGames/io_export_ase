@@ -470,7 +470,7 @@ class cMesh:
                 obj.uv_layer_stencil_index = activeUV
                 self.uvm_tvertlist = cTVertlist( object )
                 self.uvm_numtvertex = self.uvm_tvertlist.length
-                self.uvm_numtvfaces = len( object.data.uv_layer_stencil.data ) / 3
+                self.uvm_numtvfaces = int(len( object.data.uv_layer_stencil.data ) / 3)
                 self.uvm_tfacelist = cTFacelist( self.uvm_numtvfaces )
 
                 # if len(object.data.vertex_colors) > 0:
