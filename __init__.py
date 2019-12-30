@@ -819,7 +819,7 @@ def defineSmoothing( self, object ):
 # Check if the mesh is a collider
 # Return True if collision model, else: false
 def collisionObject( object ):
-    collisionPrefixes = ['UCX_', 'UBX_', 'USX_', 'MCDCX_']
+    collisionPrefixes = ['UCX_', 'UBX_', 'USX_']
     for prefix in collisionPrefixes:
         if object.name.find( str( prefix ) ) >= 0:
             return True
