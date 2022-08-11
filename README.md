@@ -2,6 +2,8 @@
 
 This is a fork from the [original project](http://code.google.com/p/ase-export-vmc/) by MCampagnini. The script has been upgraded to support Blender 2.78a and Blender 2.80 (check the Releases).
 
+This addon has been superceded by [io_scene_ase](https://github.com/DarklightGames/io_scene_ase).
+
 ## Videos
 * Blender 2.63a and ASE 2.01 (http://www.youtube.com/watch?v=63Wz0FoK2U0)
 * Blender 2.59 old version (http://www.youtube.com/watch?v=ZPQW5x1rhAY&feature=channel&list=UL)
