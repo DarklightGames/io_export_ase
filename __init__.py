@@ -991,7 +991,7 @@ class ExportAse( bpy.types.Operator, ExportHelper ):
             file.close()
 
     def execute( self, context ):
-        start = time.clock()
+        start = time.process_time()
 
         global optionScale
         global optionSubmaterials
@@ -1070,7 +1070,7 @@ class ExportAse( bpy.types.Operator, ExportHelper ):
         # Write the ASE file
         self.writeASE( self.filepath, aseModel )
 
-        lapse = ( time.clock() - start )
+        lapse = ( time.process_time() - start )
         print( 'Completed in ' + str( lapse ) + ' seconds' )
 
         return {'FINISHED'}
